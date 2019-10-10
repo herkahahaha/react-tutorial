@@ -1,68 +1,230 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# React Tic-Tac-Toe
 
-## Available Scripts
+info :<br/>
+tutorial: https://id.reactjs.org/tutorial/tutorial.html / https://reactjs.org/tutorial/tutorial.html <br/>
+by [Dan Abramov](https://overreacted.io)
 
-In the project directory, you can run:
+## Intro
 
-### `npm start`
+> Seperti yang diulas di website official reactjs, bahwasanya reactjs adalah sekumpulan `komponent` dengan menggunakan methode `render` untuk menghubungkan satu sama lain, `baiknya, baca dokumentasinya terlebih dahulu`.
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+```
+branch: master (production)
+        staging (file sample)
+```
 
-The page will reload if you make edits.<br>
-You will also see any lint errors in the console.
+## Studi Kasus
 
-### `npm test`
+> Syntax tutorial ini masih menggunakan `Class Component`, pembelajaran kali ini merapikan/refactoring kode menggunakan `HOOKS` dari reactjs terbaru saat ini.
 
-Launches the test runner in the interactive watch mode.<br>
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+**!!! Perlu diperhatikan, ini adalah opsional dalam penggunaan reactjs, namun ini sangat dianjurkan untuk mengatasi komponent yang menumpuk saat aplikasimu skala besar**
 
-### `npm run build`
+- coba untuk mengerti `life cycle` dari reactjs yang menggunakan `class component` terlebih dahulu sebelum mencoba `HOOKS` pada parent component
 
-Builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- Board.js (before)
 
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
+```js
+class Board extends Component {
+  renderSquare = i => {
+    return (
+      <Square
+        value={this.props.squares[i]}
+        onClick={() => this.props.onClick(i)}
+      />
+    );
+  };
+  render() {
+    return (
+      <div>
+        {/* board game */}
+        <div className="board-row">
+          {this.renderSquare(0)}
+          {this.renderSquare(1)}
+          {this.renderSquare(2)}
+        </div>
+        <div className="board-row">
+          {this.renderSquare(3)}
+          {this.renderSquare(4)}
+          {this.renderSquare(5)}
+        </div>
+        <div className="board-row">
+          {this.renderSquare(6)}
+          {this.renderSquare(7)}
+          {this.renderSquare(8)}
+        </div>
+      </div>
+    );
+  }
+}
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+> mengganti `class component` dengan `const` karena `class component` cukup susah dimengerti manusia dan bahkan mesin.
 
-### `npm run eject`
+- Board.js (after)
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+```js
+import React from "react";
+import Square from "./Square";
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+const Board = props => {
+  const renderSquare = i => {
+    return <Square value={props.squares[i]} onClick={() => props.onClick(i)} />;
+  };
+  return (
+    <div>
+      {/* board game */}
+      <div className="board-row">
+        {renderSquare(0)}
+        {renderSquare(1)}
+        {renderSquare(2)}
+      </div>
+      <div className="board-row">
+        {renderSquare(3)}
+        {renderSquare(4)}
+        {renderSquare(5)}
+      </div>
+      <div className="board-row">
+        {renderSquare(6)}
+        {renderSquare(7)}
+        {renderSquare(8)}
+      </div>
+    </div>
+  );
+};
 
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+export default Board;
+```
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+- Game.js
 
-## Learn More
+```js
+//before
+class Game extends Component {
+  state = {
+    history: [
+      {
+        squares: Array(9).fill(null)
+      }
+    ],
+    stepNumber: 0,
+    xIsNext: true
+  };
+}
+// after
+function usePlayHook() {
+  // HOOKS
+  const [board, setBoard] = useState(Array(9).fill(null));
+  const [xIsNext, setIsNext] = useState(true);
+}
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```js
+// before
+handleClick = i => {
+  //ini tidak dipakai
+  const history = this.state.history.slice(0, this.state.stepNumber + 1);
+  const current = history[history.length - 1];
+  //ini berubah
+  const squares = current.squares.slice();
+  if (calculateWinner(squares) || squares[i]) {
+    return;
+  }
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+  squares[i] = this.state.xIsNext ? "X" : "O";
+  //ini berubah
+  this.setState({
+    history: history.concat([
+      {
+        squares: squares
+      }
+    ]),
+    stepNumber: history.length,
+    xIsNext: !this.state.xIsNext
+  });
+};
+// After
+const handleClick = i => {
+  const squares = { ...board };
+  if (calculateWinner(board) || squares[i]) return;
+  squares[i] = xIsNext ? "X" : "O";
+  setBoard(squares);
+  setIsNext(!xIsNext);
+};
+```
 
-### Code Splitting
+```js
+render() {
+    const history = this.state.history; //ini tidak digunakan
+    const current = history[this.state.stepNumber]; //ini tidak digunakan
+    const winner = calculateWinner(current.squares);
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
+    // bagian ini tidak saya gunakan di hooks
+    const moves = history.map((step, move) => {
+      const desc = move ? "Go to move #" + move : "Go to game start";
+      return (
+        <li key={move}>
+          <button onClick={() => this.jumpTo(move)}>{desc}</button>
+        </li>
+      );
+    });
 
-### Analyzing the Bundle Size
+    let status;
+    if (winner) {
+      status = "Winner: " + winner;
+    } else {
+      status = "Next player: " + (this.state.xIsNext ? "X" : "O");
+    }
+    return (
+      <div className="game">
+        <div className="game-board">
+          <Board squares={current.squares} onClick={i => this.handleClick(i)} />
+        </div>
+        <div className="game-info">
+          <div>{status}</div>
+          <ol>{moves}</ol>
+        </div>
+      </div>
+    );
+}
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
+```
 
-### Making a Progressive Web App
+```js
+// After
+let status;
+const winner = calculateWinner(board);
+if (winner) {
+  status = "Winner: " + winner;
+} else {
+  status = "Next player: " + (xIsNext ? "X" : "O");
+}
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
+const renderSquare = i => {
+  return <Square value={board[i]} onClick={() => handleClick(i)} />;
+};
+return (
+  <div>
+    <div className="status game-info">{status}</div>
+    <div style={{ marginLeft: "5rem" }}>
+      {/* board game */}
+      <div className="board-row">
+        {renderSquare(0)}
+        {renderSquare(1)}
+        {renderSquare(2)}
+      </div>
+      <div className="board-row">
+        {renderSquare(3)}
+        {renderSquare(4)}
+        {renderSquare(5)}
+      </div>
+      <div className="board-row">
+        {renderSquare(6)}
+        {renderSquare(7)}
+        {renderSquare(8)}
+      </div>
+    </div>
+  </div>
+);
+```
 
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `npm run build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+> ini merupakan contoh sederhana menerapkan `hooks` pada file reactjs yang menggunakan `class component`.
