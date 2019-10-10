@@ -9,7 +9,7 @@ by [Dan Abramov](https://overreacted.io)
 > Seperti yang diulas di website official reactjs, bahwasanya reactjs adalah sekumpulan `komponent` dengan menggunakan methode `render` untuk menghubungkan satu sama lain, `baiknya, baca dokumentasinya terlebih dahulu`.
 
 ```
-branch: master (production)
+branch: master (intro)
         staging (file sample)
 ```
 
