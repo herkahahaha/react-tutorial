@@ -12,7 +12,7 @@ by [Dan Abramov](https://overreacted.io)
 branch: master (production)
         staging (file sample)
 ```
-![live demo](https://tictactoe.herkahahaha.now.sh/)
+[live demo](https://tictactoe.herkahahaha.now.sh/)
 
 ## Studi Kasus
 
